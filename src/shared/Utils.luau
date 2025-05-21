@@ -3,10 +3,19 @@ local Players = game:GetService("Players")
 local Workspace = game:GetService("Workspace")
 
 local Utils = {}
+local wChildren = Workspace:GetChildren() -- au cas ou jcpa
 
-function Utils.setVisibility(elements: { BasePart })
+function Utils.debug(...)
+	local debugMode = true -- stp oublie pas de changer a la sortie du jeu
+	if not debugMode then
+		return
+	end
+	print(...)
+end
+
+function Utils.setVisibility(elements: { BasePart }, state: boolean)
 	for _, elem in elements do
-		if elem.Transparency >= 0 then
+		if state ~= false then
 			elem.Transparency = 0
 		else
 			elem.Transparency = 1
@@ -20,11 +29,19 @@ function Utils.setEnabled(elements: { GuiObject })
 	end
 end
 
-function Utils.loopActions(loop: number)
+function Utils.setCollisions(elements: { BasePart })
+	for _, elem in elements do
+		elem.CanCollide = not elem.CanCollide
+		elem.CanTouch = not elem.CanTouch
+		elem.CanQuery = not elem.CanQuery
+	end
+end
+
+function Utils.loopActions(loop: number, state: boolean)
 	local loopsTags = {
 		CollectionService:GetTagged("loop1"),
 		CollectionService:GetTagged("loop2"),
-		-- CollectionService:GetTagged("loop3"),
+		CollectionService:GetTagged("loop3"),
 		-- CollectionService:GetTagged("loop4"),
 		-- CollectionService:GetTagged("loop5"),
 		-- CollectionService:GetTagged("loop6"),
@@ -57,23 +74,46 @@ function Utils.loopActions(loop: number)
 	if loopsTags[loop] then
 		for _, elems in loopsTags[loop] do
 			if elems:IsA("BasePart") then
-				Utils.setVisibility({ elems })
+				Utils.setVisibility({ elems }, state)
 
-			elseif elems:IsA("Model") then
-				local elem = elems:GetChildren()
-				for i in elem do
-					if i:IsA("BasePart") then
-						Utils.setVisibility({ elem })
-					else
-						Utils.setEnabled({ elem })
-					end
-				end
-			
+			-- elseif elems:IsA("Model") then
+			-- 	local elems2 = elems:GetChildren()
+			-- 	for _, elem in elems2 do
+			-- 		if elem:IsA("BasePart", "Accessory") then
+			-- 			Utils.setVisibility({ elem }, state)
+			-- 		end
+			-- 	end
 			else
-				Utils.setEnabled({elems})
-			
+				Utils.setEnabled({ elems })
 			end
 		end
+	end
+end
+
+function Utils.giveAttributes()
+	for _, i in wChildren do
+		if i:IsA("Model") then
+			local tags = i:GetTags()
+			for _, tag in tags do
+				if string.match(tag, "loop%d+") then
+					i:SetAttribute("isMoved", false)
+					i:SetAttribute("ogPos", i:GetPivot())
+				end
+			end
+		end
+	end
+end
+
+function Utils.hideModel(model: Model, pos: CFrame, state: boolean)
+	if state ~= false then
+		if model:GetAttribute("movedTo") ~= false then
+			model:MoveTo(Vector3.new(pos.X, pos.Y, pos.Z))
+
+		else
+			Utils.debug(model.Name, "isMoved = false, ignoring...")
+		end
+	else
+		return
 	end
 end
 
