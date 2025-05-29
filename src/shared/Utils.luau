@@ -4,13 +4,24 @@ local Workspace = game:GetService("Workspace")
 
 local Utils = {}
 local wChildren = Workspace:GetChildren() -- au cas ou jcpa
+-- local invisPos = Vector3.new(0, -150, 0)
 
 function Utils.debug(...)
-	local debugMode = true -- stp oublie pas de changer a la sortie du jeu
-	if not debugMode then
+	local debugMode = true -- stp oublie pas de changer a false pour la sortie du jeu
+	if debugMode == false then
 		return
+	else
+		print(...)
 	end
-	print(...)
+end
+
+function Utils.isCharacter(hit: Instance): boolean
+    local model = hit:FindFirstAncestorOfClass("Model")
+    if model then
+        local player = game:GetService("Players"):GetPlayerFromCharacter(model)
+        return player ~= nil
+    end
+    return false
 end
 
 function Utils.setVisibility(elements: { BasePart }, state: boolean)
@@ -37,11 +48,23 @@ function Utils.setCollisions(elements: { BasePart })
 	end
 end
 
+-- function Utils.hideModel(model: Model, pos: CFrame, state: boolean)
+-- 	if state ~= false then
+-- 		if model:GetAttribute("movedTo") ~= false then
+-- 			model:MoveTo(Vector3.new(pos.X, pos.Y, pos.Z))
+-- 		else
+-- 			Utils.debug(model.Name, "isMoved = false, ignoring...")
+-- 		end
+-- 	else
+-- 		return
+-- 	end
+-- end
+
 function Utils.loopActions(loop: number, state: boolean)
 	local loopsTags = {
-		CollectionService:GetTagged("loop1"),
+		-- CollectionService:GetTagged("loop1"),
 		CollectionService:GetTagged("loop2"),
-		CollectionService:GetTagged("loop3"),
+		-- CollectionService:GetTagged("loop3"),
 		-- CollectionService:GetTagged("loop4"),
 		-- CollectionService:GetTagged("loop5"),
 		-- CollectionService:GetTagged("loop6"),
@@ -75,14 +98,8 @@ function Utils.loopActions(loop: number, state: boolean)
 		for _, elems in loopsTags[loop] do
 			if elems:IsA("BasePart") then
 				Utils.setVisibility({ elems }, state)
-
 			-- elseif elems:IsA("Model") then
-			-- 	local elems2 = elems:GetChildren()
-			-- 	for _, elem in elems2 do
-			-- 		if elem:IsA("BasePart", "Accessory") then
-			-- 			Utils.setVisibility({ elem }, state)
-			-- 		end
-			-- 	end
+			-- 	Utils.hideModel(elems, pos, true)
 			else
 				Utils.setEnabled({ elems })
 			end
@@ -101,19 +118,6 @@ function Utils.giveAttributes()
 				end
 			end
 		end
-	end
-end
-
-function Utils.hideModel(model: Model, pos: CFrame, state: boolean)
-	if state ~= false then
-		if model:GetAttribute("movedTo") ~= false then
-			model:MoveTo(Vector3.new(pos.X, pos.Y, pos.Z))
-
-		else
-			Utils.debug(model.Name, "isMoved = false, ignoring...")
-		end
-	else
-		return
 	end
 end
 
