@@ -16,12 +16,13 @@ function Utils.debug(...)
 end
 
 function Utils.isCharacter(hit: Instance): boolean
-    local model = hit:FindFirstAncestorOfClass("Model")
-    if model then
-        local player = game:GetService("Players"):GetPlayerFromCharacter(model)
-        return player ~= nil
-    end
-    return false
+	local model = hit:FindFirstAncestorOfClass("Model") :: Model
+	if model then
+		local player = game:GetService("Players") :: Player
+		player:GetPlayerFromCharacter(model)
+		return player ~= nil
+	end
+	return false
 end
 
 function Utils.setVisibility(elements: { BasePart }, state: boolean)
@@ -98,8 +99,8 @@ function Utils.loopActions(loop: number, state: boolean)
 		for _, elems in loopsTags[loop] do
 			if elems:IsA("BasePart") then
 				Utils.setVisibility({ elems }, state)
-			-- elseif elems:IsA("Model") then
-			-- 	Utils.hideModel(elems, pos, true)
+				-- elseif elems:IsA("Model") then
+				-- 	Utils.hideModel(elems, pos, true)
 			else
 				Utils.setEnabled({ elems })
 			end
@@ -131,6 +132,25 @@ function Utils.toSpawn()
 		return
 	end
 	player.Character:MoveTo(spawnLocation.Position)
+end
+
+function Utils.interact(name: string, objText: string, actText: string, cfunc: (...any) -> any)
+	for _, instance in CollectionService:GetTagged("interact") do
+		if instance:IsA("Instance") and not instance:FindFirstChild("ProximityPrompt") then
+			local prompt = Instance.new("ProximityPrompt")
+			prompt.Name = name
+			prompt.ActionText = actText
+			prompt.ObjectText = objText
+			prompt.RequiresLineOfSight = false
+			prompt.MaxActivationDistance = 10
+			prompt.Parent = instance
+
+			prompt.Triggered:Connect(function(player: Player)
+				Utils.debug("[Utils.interact.prompt]:", player.Name, "interacted with", instance.Name)
+				cfunc()
+			end)
+		end
+	end
 end
 
 return Utils
