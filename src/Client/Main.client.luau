@@ -10,12 +10,23 @@ local Workspace = game:GetService("Workspace")
 local Packet = require(ReplicatedStorage.Packet)
 
 local startZone, endZone = Workspace:WaitForChild("loopStart")::Part, Workspace:WaitForChild("loopEnd")::Part
-local startPacket, endPacket = Packet("startPacket", Packet.Instance), Packet("endPacket", Packet.Instance)
+local startPacket, endPacket = Packet("startPacket"), Packet("endPacket")
 
-startZone.Touched:Connect(function(hit)
-	startPacket:Fire(hit)
+local nearEndZone = Workspace:WaitForChild("nearEnd")::Part
+local nearEndPacket = Packet("nearEndPacket", Packet.Boolean8)
+
+startZone.Touched:Connect(function()
+	startPacket:Fire()
 end)
 
-endZone.Touched:Connect(function(hit)
-  endPacket:Fire(hit)
+nearEndZone.Touched:Connect(function()
+  nearEndPacket:Fire(true)
+end)
+
+nearEndZone.TouchEnded:Connect(function()
+	nearEndPacket:Fire(false)
+end)
+
+endZone.Touched:Connect(function()
+  endPacket:Fire()
 end)
